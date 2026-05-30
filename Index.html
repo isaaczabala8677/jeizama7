@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="es" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diario Reflexivo Colaborativo</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Source+Sans+3:wght@300;400;600&amp;display=swap" rel="stylesheet">
+  <style>
+html, body { height: 100%; margin: 0; }
+body { font-family: 'Source Sans 3', sans-serif; }
+.heading-font { font-family: 'Playfair Display', serif; }
+[contenteditable]:focus { outline: 2px solid #5b7a5e; outline-offset: 2px; border-radius: 4px; }
+.photo-circle { width: 80px; height: 80px; border-radius: 50%; overflow: hidden; cursor: pointer; position: relative; flex-shrink: 0; }
+.photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+.photo-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; border-radius: 50%; }
+.photo-circle:hover .photo-overlay { opacity: 1; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+.page { animation: slideIn 0.5s ease; display: none !important; flex-direction: column; height: 100%; width: 100%; }
+.page.active { display: flex !important; }
+.nav-item { transition: all 0.2s ease; }
+.nav-item.active { font-weight: 600; }
+.nav-dot { width: 10px; height: 10px; border-radius: 50%; transition: all 0.2s ease; cursor: pointer; }
+.nav-dot.active { width: 28px; border-radius: 5px; }
+/* Sidebar base styles - Mobile first */
+#sidebar { 
+  display: flex;
+  flex-direction: column;
+  background-color: #2c3e2d;
+  overflow-y: auto;
+  width: 16rem;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  z-index: 40;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+/* Show sidebar when menu-open on mobile */
+#sidebar.menu-open {
+  transform: translateX(0) !important;
+}
+
+/* Backdrop */
+#menu-backdrop {
+  display: none;
+}
+
+#menu-backdrop.menu-open {
+  display: block !important;
+}
+
+/* Desktop: sidebar visible in flow */
+@media (min-width: 1024px) {
+  #sidebar {
+    position: relative;
+    left: auto;
+    top: auto;
+    height: auto;
+    transform: none !important;
+    width: 16rem;
+  }
+  
+  /* Hide backdrop on desktop */
+  #menu-backdrop {
+    display: none !important;
+  }
+}
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ <script src="/_sdk/telemetry_sdk.js"></script></head>
+ <body class="h-full bg-[#f7f4ef]">
+  <div id="app" class="h-full w-full flex flex-col overflow-hidden">
+   <!-- Mobile overlay backdrop -->
+   <div id="menu-backdrop" class="hidden fixed inset-0 bg-black/50 z-30 lg:hidden" onclick="toggleMenu()"></div>
+   <button id="mobile-menu-open" onclick="toggleMenu()" class="fixed top-4 left-4 z-20 p-3 bg-[#2c3e2d] text-[#f7f4ef] rounded-xl shadow-lg lg:hidden" aria-label="Abrir menú de navegación">
+    <i data-lucide="menu" style="width:24px;height:24px"></i>
+   </button>
+   <div class="flex-1 flex overflow-hidden relative">
+    <!-- Sidebar / Dropdown Menu -->
+    <div id="sidebar" class="w-64 bg-[#2c3e2d] text-[#f7f4ef] p-6 flex flex-col border-r border-[#1f2c1f] overflow-y-auto">
+     <!-- Menu Toggle Button --> <button onclick="toggleMenu()" class="p-2 hover:bg-[#3d5240] rounded-lg transition-colors text-[#f7f4ef] lg:hidden self-end mb-4"> <i data-lucide="menu" id="menu-icon" style="width:24px;height:24px"></i> </button>
+     <div class="text-center mb-8">
+      <div class="flex justify-center mb-3"><i data-lucide="book-open" style="width:36px;height:36px;color:#a8c5a0"></i>
+      </div>
+      <h1 id="main-title" class="heading-font text-2xl font-bold mb-2 text-[#f7f4ef]" contenteditable="true">Diario Reflexivo</h1>
+      <p id="sidebar-module-name" class="text-xs text-[#a8c5a0]" contenteditable="true">Pensamiento y Epistemologías Críticas en Educación</p>
+     </div>
+     <div class="text-xs uppercase tracking-widest text-[#a8c5a0] font-semibold px-2 mb-4">
+      Entradas
+     </div><button onclick="goToPage(0)" class="nav-item active w-full text-left px-3 py-2 rounded-lg hover:bg-[#3d5240] transition-all flex items-center gap-2 text-[#f7f4ef]" data-page="0"> <span class="nav-dot active bg-[#a8c5a0]"></span> <span class="text-sm">Inicio</span> </button> <button onclick="goToPage(1)" class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-[#3d5240] transition-all flex items-center gap-2 text-[#d4e4d6]" data-page="1"> <span class="nav-dot bg-[#a8c5a0]"></span> <span class="text-sm">Beatriz — Inclusión</span> </button> <button onclick="goToPage(2)" class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-[#3d5240] transition-all flex items-center gap-2 text-[#d4e4d6]" data-page="2"> <span class="nav-dot bg-[#a8c5a0]"></span> <span class="text-sm">Jeris — Inglés situado</span> </button> <button onclick="goToPage(3)" class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-[#3d5240] transition-all flex items-center gap-2 text-[#d4e4d6]" data-page="3"> <span class="nav-dot bg-[#a8c5a0]"></span> <span class="text-sm">Beatriz — Freire y Foucault</span> </button> <button onclick="goToPage(4)" class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-[#3d5240] transition-all flex items-center gap-2 text-[#d4e4d6]" data-page="4"> <span class="nav-dot bg-[#a8c5a0]"></span> <span class="text-sm">Jeris — Colonialidad</span> </button> <button onclick="goToPage(5)" class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-[#3d5240] transition-all flex items-center gap-2 text-[#d4e4d6]" data-page="5"> <span class="nav-dot bg-[#a8c5a0]"></span> <span class="text-sm">Beatriz — Lugar de enunciación</span> </button> <button onclick="goToPage(6)" class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-[#3d5240] transition-all flex items-center gap-2 text-[#d4e4d6]" data-page="6"> <span class="nav-dot bg-[#a8c5a0]"></span> <span class="text-sm">Jeris — Problematizar</span> </button> <button onclick="goToPage(7)" class="nav-item w-full text-left px-3 py-2 rounded-lg hover:bg-[#3d5240] transition-all flex items-center gap-2 text-[#d4e4d6]" data-page="7"> <span class="nav-dot bg-[#a8c5a0]"></span> <span class="text-sm">Reflexión Final</span> </button>
+    </div>
+    <main class="flex-1 overflow-hidden bg-[#f7f4ef] flex flex-col">
+     <!-- Breadcrumb Navigation -->
+     <div class="bg-[#f0f7f1] border-b border-[#d4e4d6] px-6 md:px-12 py-3 hidden" id="breadcrumb-container">
+      <nav class="flex items-center gap-2 text-sm"><button onclick="goToPage(0)" class="text-[#5b7a5e] hover:text-[#2c3e2d] transition-colors flex items-center gap-1"> <i data-lucide="home" style="width:16px;height:16px"></i> <span>Inicio</span> </button> <span class="text-[#9ca3af]">/</span> <span id="breadcrumb-current" class="text-[#2c3e2d] font-semibold"></span>
+      </nav>
+     </div><!-- Page 0: Cover -->
+     <div class="page active h-full flex flex-col items-center justify-center px-6 py-12 flex-1 overflow-y-auto">
+      <div class="text-center max-w-2xl">
+       <div class="mb-8"><i data-lucide="book-open" style="width:64px;height:64px;color:#5b7a5e" class="mx-auto"></i>
+       </div>
+       <h1 class="heading-font text-5xl font-bold mb-4 text-[#2c3e2d]" contenteditable="true">Diario Reflexivo Colaborativo</h1>
+       <p class="text-xl text-[#5b7a5e] mb-6" contenteditable="true">Pensamiento y Epistemologías Críticas en Educación</p>
+       <div class="bg-white rounded-2xl shadow-md p-8 mb-8">
+        <p class="text-[#6b7280] leading-relaxed text-lg" contenteditable="true">Este diario reflexivo colaborativo representa el ejercicio de pensamiento crítico compartido entre los autores a lo largo del módulo de Pensamiento y Epistemologías Críticas en Educación en el programa de Doctorado en Pedagogía y Saberes Educativos de la Universidad de Manizales. Cada entrada documenta desaprendizajes, tensiones conceptuales y nuevas preguntas que emergen del diálogo entre la teoría crítica y las prácticas pedagógicas situadas.</p>
+       </div><!-- Authors Section -->
+       <div class="mb-8 w-full max-w-2xl">
+        <p class="text-center text-[#5b7a5e] font-semibold text-sm uppercase tracking-widest mb-6">Autores</p>
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-8">
+         <!-- Author 1: Beatriz -->
+         <div class="flex flex-col items-center text-center">
+          <div class="photo-circle bg-[#d4e4d6] mb-4 w-24 h-24" onclick="uploadPhoto(this)">
+           <div class="w-full h-full flex items-center justify-center text-[#5b7a5e] text-4xl font-bold">
+            B
+           </div>
+           <div class="photo-overlay"><i data-lucide="camera" style="width:24px;height:24px;color:white"></i>
+           </div><input type="file" accept="image/*" class="hidden" onchange="handlePhoto(event, this.parentElement)">
+          </div>
+          <h3 class="heading-font text-lg font-semibold text-[#2c3e2d]">Beatriz Murillo</h3>
+          <p class="text-sm text-[#5b7a5e]">Docente e investigadora</p>
+          <p class="text-xs text-[#6b7280]">Inclusión educativa</p>
+         </div><!-- Author 2: Jeris -->
+         <div class="flex flex-col items-center text-center">
+          <div class="photo-circle bg-[#d6dce4] mb-4 w-24 h-24" onclick="uploadPhoto(this)">
+           <div class="w-full h-full flex items-center justify-center text-[#4a5e7a] text-4xl font-bold">
+            J
+           </div>
+           <div class="photo-overlay"><i data-lucide="camera" style="width:24px;height:24px;color:white"></i>
+           </div><input type="file" accept="image/*" class="hidden" onchange="handlePhoto(event, this.parentElement)">
+          </div>
+          <h3 class="heading-font text-lg font-semibold text-[#2c3e2d]">Jeris Zabala</h3>
+          <p class="text-sm text-[#5b7a5e]">Docente e investigador</p>
+          <p class="text-xs text-[#6b7280]">Enseñanza del inglés situado</p>
+         </div>
+        </div>
+       </div><button onclick="goToPage(1)" class="inline-flex items-center gap-2 bg-[#5b7a5e] hover:bg-[#4a6b4d] text-white px-8 py-3 rounded-lg font-semibold transition-colors"><span>Comenzar a leer</span><i data-lucide="arrow-right" style="width:20px;height:20px"></i></button>
+      </div>
+     </div><!-- Page 1: Entry 1 -->
+     <div class="page h-full flex flex-col px-6 md:px-12 py-8">
+      <div class="flex-1 overflow-y-auto">
+       <article class="bg-white rounded-2xl shadow-md p-8 md:p-10">
+        <div class="flex items-start gap-4 mb-6">
+         <div class="photo-circle bg-[#d4e4d6]" onclick="uploadPhoto(this)">
+          <div class="w-full h-full flex items-center justify-center text-[#5b7a5e] text-2xl font-bold">
+           B
+          </div>
+          <div class="photo-overlay"><i data-lucide="camera" style="width:20px;height:20px;color:white"></i>
+          </div><input type="file" accept="image/*" class="hidden" onchange="handlePhoto(event, this.parentElement)">
+         </div>
+         <div>
+          <span class="text-xs uppercase tracking-widest text-[#5b7a5e] font-semibold">Entrada 1 — 11 de mayo de 2026</span>
+          <h2 class="heading-font text-2xl md:text-3xl font-bold text-[#2c3e2d]">Inclusión educativa y reconocimiento del otro</h2>
+          <p class="text-sm text-[#6b7280]">Autora: <span contenteditable="true">Beatriz</span></p>
+         </div>
+        </div>
+        <div class="prose prose-lg text-[#374151] leading-relaxed space-y-4" contenteditable="true">
+         <p>Antes de empezar el estudio epistemológico de este módulo, mi comprensión sobre la inclusión educativa estaba relacionada principalmente con el acceso de los estudiantes al sistema escolar y con el deber de garantizar igualdad de oportunidades dentro del aula. Consideraba que una escuela inclusiva era aquella que permitía la presencia de todos los estudiantes, sin distinción de sus condiciones personales, sociales, culturales o cognitivas. Sin embargo, el desarrollo del módulo me permitió tensionar esta comprensión inicial y reconocer que la inclusión no puede reducirse únicamente a la presencia física en la institución educativa ni al cumplimiento formal de una política escolar.</p>
+         <p>Desde las epistemologías críticas en educación, comprendí que toda práctica educativa está atravesada por relaciones de poder, formas de reconocimiento y modos de producción de subjetividad. En este sentido, una escuela puede declararse inclusiva y, al mismo tiempo, reproducir formas sutiles de exclusión cuando no reconoce plenamente la voz, la experiencia y la dignidad de los estudiantes. Este ha sido uno de mis principales desaprendizajes: entender que la inclusión no se agota en permitir que todos estén en el aula, sino que exige preguntarse quiénes participan realmente, quiénes son escuchados, qué saberes son valorados y qué estudiantes continúan siendo ubicados desde el déficit, la carencia o la diferencia entendida como problema.</p>
+         <p>Esta reflexión ha transformado mi manera de comprender las relaciones entre estudiantes dentro de mi contexto institucional. Antes podía mirar ciertos conflictos escolares como situaciones aisladas de convivencia o como dificultades individuales de algunos estudiantes. Ahora empiezo a reconocer que esas relaciones también están configuradas por prácticas pedagógicas, discursos institucionales, formas de clasificación y modos de nombrar al otro. La inclusión, entonces, no es solamente una responsabilidad normativa, sino una práctica ética y política que se construye cotidianamente en la forma como se organiza una clase, se distribuye la palabra, se reconocen las diferencias y se promueve la participación.</p>
+         <p>Este nuevo entendimiento tiene implicaciones importantes para mi investigación doctoral, porque me permite desplazar el interés desde la inclusión entendida como política educativa hacia la comprensión de las relaciones incluyentes que se configuran entre estudiantes a partir de las prácticas pedagógicas. Ya no me interesa solamente saber si una institución "incluye", sino cómo se producen o se obstaculizan relaciones de reconocimiento, empatía, colaboración y legitimación del otro en la vida cotidiana del aula.</p>
+        </div>
+        <div class="mt-6 p-4 bg-[#f0f7f1] rounded-xl border-l-4 border-[#5b7a5e]">
+         <p class="text-sm font-semibold text-[#5b7a5e] mb-2 flex items-center gap-2"><i data-lucide="help-circle" style="width:16px;height:16px"></i> Preguntas emergentes</p>
+         <div class="text-[#374151] text-sm space-y-1" contenteditable="true">
+          <p>¿Qué formas de exclusión permanecen invisibles dentro de prácticas escolares que se nombran como inclusivas?</p>
+          <p>¿Cómo pueden las prácticas pedagógicas favorecer relaciones de reconocimiento entre estudiantes?</p>
+          <p>¿De qué manera la escuela puede dejar de mirar la diferencia como problema y empezar a asumirla como posibilidad ética, pedagógica y humana?</p>
+         </div>
+        </div>
+       </article>
+      </div>
+      <div class="flex justify-between items-center mt-6 gap-4">
+       <button onclick="goToPage(0)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e5e7eb] hover:bg-[#d1d5db] text-[#374151] font-medium transition-colors"><i data-lucide="arrow-left" style="width:18px;height:18px"></i><span class="hidden sm:inline">Atrás</span></button>
+       <div class="text-sm text-[#6b7280]">
+        1 / 8
+       </div><button onclick="goToPage(2)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5b7a5e] hover:bg-[#4a6b4d] text-white font-medium transition-colors"><span class="hidden sm:inline">Siguiente</span><i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+      </div>
+     </div><!-- Page 2: Entry 2 -->
+     <div class="page h-full flex flex-col px-6 md:px-12 py-8">
+      <div class="flex-1 overflow-y-auto">
+       <article class="bg-white rounded-2xl shadow-md p-8 md:p-10">
+        <div class="flex items-start gap-4 mb-6">
+         <div class="photo-circle bg-[#d6dce4]" onclick="uploadPhoto(this)">
+          <div class="w-full h-full flex items-center justify-center text-[#4a5e7a] text-2xl font-bold">
+           J
+          </div>
+          <div class="photo-overlay"><i data-lucide="camera" style="width:20px;height:20px;color:white"></i>
+          </div><input type="file" accept="image/*" class="hidden" onchange="handlePhoto(event, this.parentElement)">
+         </div>
+         <div>
+          <span class="text-xs uppercase tracking-widest text-[#5b7a5e] font-semibold">Entrada 2 — 13 de mayo de 2026</span>
+          <h2 class="heading-font text-2xl md:text-3xl font-bold text-[#2c3e2d]">Del inglés instrumental al inglés como experiencia situada</h2>
+          <p class="text-sm text-[#6b7280]">Autor: <span contenteditable="true">Jeris Zabala</span></p>
+         </div>
+        </div>
+        <div class="prose prose-lg text-[#374151] leading-relaxed space-y-4" contenteditable="true">
+         <p>Uno de los conceptos que más ha tensionado mis comprensiones durante el desarrollo del módulo ha sido el de razón instrumental, abordado desde las perspectivas críticas de la Escuela de Frankfurt. Antes de este proceso formativo, muchas de mis preguntas como docente de inglés estaban centradas en asuntos metodológicos: cómo motivar más a los estudiantes, cómo diseñar actividades llamativas, cómo mejorar la participación o cómo lograr mejores desempeños en el aprendizaje de vocabulario, estructuras gramaticales y funciones comunicativas. Si bien estas preguntas siguen siendo importantes para la práctica pedagógica, el módulo me permitió comprender que no son suficientes para pensar críticamente el problema educativo que atraviesa mi investigación doctoral.</p>
+         <p>La crítica a la razón instrumental me llevó a reconocer que la enseñanza del inglés puede quedar atrapada en una lógica de eficiencia, medición y resultado. Desde esta mirada, el inglés corre el riesgo de ser entendido únicamente como competencia, nivel, estándar, indicador o requisito del progreso académico y laboral. Esta comprensión tensionó mi forma previa de mirar la clase de lengua extranjera, porque me permitió advertir que, cuando el aprendizaje se reduce a desempeño medible, se debilita su dimensión humana, cultural, emocional y situada.</p>
+         <p>Este desaprendizaje ha sido fundamental para mi proceso investigativo. Inicialmente, podía pensar en la gamificación como estrategia para aumentar la motivación o mejorar la participación de los estudiantes. Sin embargo, desde las epistemologías críticas, esta mirada resulta limitada si no se pregunta por el sentido de aquello que se aprende, por las relaciones de poder que atraviesan el currículo y por las formas de subjetividad que se producen en el aula. En otras palabras, no basta con hacer la clase más dinámica; es necesario preguntarse qué tipo de experiencia educativa se está construyendo y qué lugar ocupan los estudiantes en ella.</p>
+         <p>En el proceso de construcción de mi investigación doctoral, este giro me permite comprender que el inglés no debería enseñarse como un saber externo, neutro o descontextualizado, sino como una posibilidad de expresión, reconocimiento y construcción de sentido. En un contexto escolar situado como Caucasia, aprender inglés puede abrir caminos para narrar la vida cotidiana, el territorio, las memorias, los vínculos, los conflictos y los sueños de los estudiantes. Por ello, la gamificación y el storytelling no pueden asumirse solo como recursos motivacionales, sino como mediaciones pedagógicas que pueden ayudar a resignificar la relación de los estudiantes con la lengua extranjera.</p>
+        </div>
+        <div class="mt-6 p-4 bg-[#f0f7f1] rounded-xl border-l-4 border-[#5b7a5e]">
+         <p class="text-sm font-semibold text-[#5b7a5e] mb-2 flex items-center gap-2"><i data-lucide="help-circle" style="width:16px;height:16px"></i> Preguntas emergentes</p>
+         <div class="text-[#374151] text-sm space-y-1" contenteditable="true">
+          <p>¿Cómo evitar que la gamificación reproduzca la misma lógica instrumental que pretende cuestionar?</p>
+          <p>¿De qué manera el storytelling situado puede permitir que los estudiantes se reconozcan como sujetos de voz y no solo como aprendices de contenido?</p>
+          <p>¿Cómo enseñar inglés sin desconectarlo del territorio y de las experiencias reales de quienes aprenden?</p>
+         </div>
+        </div>
+       </article>
+      </div>
+      <div class="flex justify-between items-center mt-6 gap-4">
+       <button onclick="goToPage(1)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e5e7eb] hover:bg-[#d1d5db] text-[#374151] font-medium transition-colors"><i data-lucide="arrow-left" style="width:18px;height:18px"></i><span class="hidden sm:inline">Atrás</span></button>
+       <div class="text-sm text-[#6b7280]">
+        2 / 8
+       </div><button onclick="goToPage(3)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5b7a5e] hover:bg-[#4a6b4d] text-white font-medium transition-colors"><span class="hidden sm:inline">Siguiente</span><i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+      </div>
+     </div><!-- Page 3: Entry 3 -->
+     <div class="page h-full flex flex-col px-6 md:px-12 py-8">
+      <div class="flex-1 overflow-y-auto">
+       <article class="bg-white rounded-2xl shadow-md p-8 md:p-10">
+        <div class="flex items-start gap-4 mb-6">
+         <div class="photo-circle bg-[#d4e4d6]" onclick="uploadPhoto(this)">
+          <div class="w-full h-full flex items-center justify-center text-[#5b7a5e] text-2xl font-bold">
+           B
+          </div>
+          <div class="photo-overlay"><i data-lucide="camera" style="width:20px;height:20px;color:white"></i>
+          </div><input type="file" accept="image/*" class="hidden" onchange="handlePhoto(event, this.parentElement)">
+         </div>
+         <div>
+          <span class="text-xs uppercase tracking-widest text-[#5b7a5e] font-semibold">Entrada 3 — 18 de mayo de 2026</span>
+          <h2 class="heading-font text-2xl md:text-3xl font-bold text-[#2c3e2d]">Freire, Foucault y las relaciones de poder en la escuela</h2>
+          <p class="text-sm text-[#6b7280]">Autora: <span contenteditable="true">Beatriz Murillo</span></p>
+         </div>
+        </div>
+        <div class="prose prose-lg text-[#374151] leading-relaxed space-y-4" contenteditable="true">
+         <p>Durante el desarrollo del módulo, los aportes de Paulo Freire y Michel Foucault me permitieron ampliar mi comprensión sobre la escuela como escenario de formación, pero también como espacio atravesado por relaciones de poder. Antes de este proceso, tendía a comprender las prácticas pedagógicas principalmente desde su intención formativa: enseñar, acompañar, orientar y favorecer aprendizajes. Sin embargo, las perspectivas críticas me llevaron a reconocer que la escuela no solo transmite contenidos, sino que también produce formas de relación, modos de participación, jerarquías, clasificaciones y subjetividades.</p>
+         <p>La crítica de Freire en la educación bancaria tensionó profundamente mi mirada sobre la participación estudiantil. Comprendí que una práctica pedagógica puede limitar la inclusión cuando ubica al estudiante en un lugar pasivo, como receptor de instrucciones, contenidos o normas. Desde esta perspectiva, la inclusión no puede reducirse a que todos los estudiantes estén presentes en el aula si sus voces no circulan, si sus experiencias no son reconocidas y si no participan activamente en la construcción del conocimiento. Freire me permitió comprender que una educación verdaderamente incluyente requiere diálogo, conciencia crítica y reconocimiento del estudiante como sujeto capaz de interpretar su realidad.</p>
+         <p>Por su parte, Foucault me permitió mirar la escuela desde otra dimensión: la de los mecanismos de normalización, vigilancia y clasificación. Este autor me ayudó a comprender que algunas prácticas escolares, incluso cuando se presentan como necesarias para el orden y la disciplina, pueden producir exclusión al definir qué comportamientos son aceptables, qué estudiantes son considerados normales y cuáles son nombrados como problemáticos. Esta mirada me llevó a cuestionar ciertas categorías que se usan cotidianamente en la escuela, como estudiante indisciplinado, estudiante difícil, estudiante con bajo rendimiento académico o estudiante poco participativo. Comprendí que estas categorías no son neutras; producen efectos sobre la forma en que los estudiantes son tratados y sobre la manera como ellos mismos se perciben.</p>
+         <p>Este ha sido un desaprendizaje importante para mi investigación doctoral. Si deseo comprender las relaciones incluyentes entre estudiantes, no puedo observarlas únicamente como vínculos espontáneos o comportamientos individuales. Debo analizarlas en relación con las prácticas pedagógicas, los discursos institucionales y las formas de poder que organizan la vida escolar. Una práctica puede promover colaboración, pero también puede reforzar jerarquías; puede hablar de inclusión, pero seguir clasificando a algunos estudiantes desde el déficit.</p>
+         <p>Esta reflexión transforma mi proceso investigativo porque me invita a mirar la inclusión como una construcción ética, política y pedagógica. No basta con preguntar qué estrategias favorecen la convivencia; es necesario problematizar qué relaciones de poder se reproducen en el aula y cómo las prácticas pedagógicas pueden abrir espacios de diálogo, participación y reconocimiento.</p>
+        </div>
+        <div class="mt-6 p-4 bg-[#f0f7f1] rounded-xl border-l-4 border-[#5b7a5e]">
+         <p class="text-sm font-semibold text-[#5b7a5e] mb-2 flex items-center gap-2"><i data-lucide="help-circle" style="width:16px;height:16px"></i> Preguntas emergentes</p>
+         <div class="text-[#374151] text-sm space-y-1" contenteditable="true">
+          <p>¿Cómo construir prácticas pedagógicas que no clasifiquen al estudiante desde la carencia?</p>
+          <p>¿Qué formas de poder se reproducen en nombre de la disciplina, la normalidad o el rendimiento?</p>
+          <p>¿Cómo puede la escuela convertirse en un espacio donde los estudiantes no solo sean regulados, sino reconocidos como sujetos de palabra, experiencia y dignidad?</p>
+         </div>
+        </div>
+       </article>
+      </div>
+      <div class="flex justify-between items-center mt-6 gap-4">
+       <button onclick="goToPage(2)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e5e7eb] hover:bg-[#d1d5db] text-[#374151] font-medium transition-colors"><i data-lucide="arrow-left" style="width:18px;height:18px"></i><span class="hidden sm:inline">Atrás</span></button>
+       <div class="text-sm text-[#6b7280]">
+        3 / 8
+       </div><button onclick="goToPage(4)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5b7a5e] hover:bg-[#4a6b4d] text-white font-medium transition-colors"><span class="hidden sm:inline">Siguiente</span><i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+      </div>
+     </div><!-- Page 4: Entry 4 -->
+     <div class="page h-full flex flex-col px-6 md:px-12 py-8">
+      <div class="flex-1 overflow-y-auto">
+       <article class="bg-white rounded-2xl shadow-md p-8 md:p-10">
+        <div class="flex items-start gap-4 mb-6">
+         <div class="photo-circle bg-[#d6dce4]" onclick="uploadPhoto(this)">
+          <div class="w-full h-full flex items-center justify-center text-[#4a5e7a] text-2xl font-bold">
+           J
+          </div>
+          <div class="photo-overlay"><i data-lucide="camera" style="width:20px;height:20px;color:white"></i>
+          </div><input type="file" accept="image/*" class="hidden" onchange="handlePhoto(event, this.parentElement)">
+         </div>
+         <div>
+          <span class="text-xs uppercase tracking-widest text-[#5b7a5e] font-semibold">Entrada 4 — 20 de mayo de 2026</span>
+          <h2 class="heading-font text-2xl md:text-3xl font-bold text-[#2c3e2d]">Colonialidad del saber y pedagogía situada</h2>
+          <p class="text-sm text-[#6b7280]">Autor: <span contenteditable="true">Jeris Zabala</span></p>
+          <p class="text-xs text-[#9ca3af] italic">Diálogo con la reflexión sobre poder e inclusión</p>
+         </div>
+        </div>
+        <div class="prose prose-lg text-[#374151] leading-relaxed space-y-4" contenteditable="true">
+         <p>La reflexión de mi compañera Beatriz sobre inclusión educativa, las relaciones de poder en la escuela y la necesidad de reconocer al otro me permitió ampliar una pregunta que considero central para las epistemologías críticas en educación: ¿a quiénes incluye realmente la escuela y bajo qué condiciones? Esta inquietud me llevó a conectar su reflexión con los aportes del pensamiento crítico latinoamericano y, particularmente, con la categoría de colonialidad del saber. Desde esta perspectiva, la inclusión no puede entenderse únicamente como acceso, permanencia o participación formal en el aula; también debe pensarse como reconocimiento de los saberes, las voces, las historias y las formas de existencia que históricamente han sido silenciadas o consideradas inferiores.</p>
+         <p>Este diálogo con la entrada de mi compañera Beatriz me hizo comprender que muchas veces la escuela afirma incluir, pero lo hace desde marcos previamente definidos por la institucionalidad, el currículo o los discursos dominantes. Es decir, se permite la presencia del estudiante, pero no siempre se reconoce la legitimidad de su experiencia. En este sentido, la inclusión puede volverse parcial si no cuestiona qué conocimientos son valorados, qué lenguajes son aceptados, qué cuerpos son normalizados y qué formas de aprender son consideradas válidas.</p>
+         <p>Este desaprendizaje tiene una relación directa con mi investigación doctoral sobre la enseñanza del inglés como lengua extranjera. La colonialidad del saber aparece cuando el inglés se presenta como una lengua asociada automáticamente al progreso, al éxito, a la superioridad cultural o a modelos externos de vida, mientras los saberes locales, las identidades territoriales y las experiencias de los estudiantes quedan subordinadas o invisibilizadas. El problema no está en enseñar inglés, sino en enseñarlo como si la lengua estuviera separada de las relaciones de poder, de la cultura y del territorio.</p>
+         <p>Desde esta mirada, empiezo a comprender que una pedagogía situada del inglés debe interrogar los referentes culturales que circulan en la clase. No se trata de rechazar el aprendizaje de una lengua extranjera, sino de preguntarse desde dónde se enseña, para qué se enseña y qué posibilidades de agencia ofrece a los estudiantes. El inglés puede reproducir jerarquías culturales si se enseña como imitación de lo externo, pero también puede convertirse en una herramienta de expresión si permite narrar lo propio, dialogar con otros mundos y resignificar la experiencia local.</p>
+         <p>Por eso, la reflexión de mi compañera Beatriz sobre inclusión me lleva a pensar que incluir en la clase de inglés no es solo adaptar actividades y permitir que todos participen. Inclusión implica reconocer que los estudiantes también producen saberes, relatos y sentidos sobre su mundo. Desde mi investigación, esto me invita a diseñar experiencias de gamificación y storytelling en las que el inglés no sea una lengua que desplaza los saberes locales, sino una mediación para potenciarlos y expresarlos.</p>
+        </div>
+        <div class="mt-6 p-4 bg-[#f0f7f1] rounded-xl border-l-4 border-[#5b7a5e]">
+         <p class="text-sm font-semibold text-[#5b7a5e] mb-2 flex items-center gap-2"><i data-lucide="help-circle" style="width:16px;height:16px"></i> Preguntas emergentes</p>
+         <div class="text-[#374151] text-sm space-y-1" contenteditable="true">
+          <p>¿Puede el inglés convertirse en una lengua para narrar el territorio y no para negarlo?</p>
+          <p>¿Qué lugar tienen los saberes locales en una clase de lengua extranjera?</p>
+          <p>¿Cómo evitar que una estrategia gamificada reproduzca imaginarios coloniales bajo una experiencia innovadora?</p>
+         </div>
+        </div>
+       </article>
+      </div>
+      <div class="flex justify-between items-center mt-6 gap-4">
+       <button onclick="goToPage(3)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e5e7eb] hover:bg-[#d1d5db] text-[#374151] font-medium transition-colors"><i data-lucide="arrow-left" style="width:18px;height:18px"></i><span class="hidden sm:inline">Atrás</span></button>
+       <div class="text-sm text-[#6b7280]">
+        4 / 8
+       </div><button onclick="goToPage(5)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5b7a5e] hover:bg-[#4a6b4d] text-white font-medium transition-colors"><span class="hidden sm:inline">Siguiente</span><i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+      </div>
+     </div><!-- Page 5: Entry 5 -->
+     <div class="page h-full flex flex-col px-6 md:px-12 py-8">
+      <div class="flex-1 overflow-y-auto">
+       <article class="bg-white rounded-2xl shadow-md p-8 md:p-10">
+        <div class="flex items-start gap-4 mb-6">
+         <div class="photo-circle bg-[#d4e4d6]" onclick="uploadPhoto(this)">
+          <div class="w-full h-full flex items-center justify-center text-[#5b7a5e] text-2xl font-bold">
+           B
+          </div>
+          <div class="photo-overlay"><i data-lucide="camera" style="width:20px;height:20px;color:white"></i>
+          </div><input type="file" accept="image/*" class="hidden" onchange="handlePhoto(event, this.parentElement)">
+         </div>
+         <div>
+          <span class="text-xs uppercase tracking-widest text-[#5b7a5e] font-semibold">Entrada 5 — 25 de mayo de 2026</span>
+          <h2 class="heading-font text-2xl md:text-3xl font-bold text-[#2c3e2d]">Lugar de enunciación, escucha y reflexividad del sujeto investigador</h2>
+          <p class="text-sm text-[#6b7280]">Autora: <span contenteditable="true">Beatriz Murillo</span></p>
+          <p class="text-xs text-[#9ca3af] italic">Diálogo con la reflexión sobre el inglés como experiencia situada</p>
+         </div>
+        </div>
+        <div class="prose prose-lg text-[#374151] leading-relaxed space-y-4" contenteditable="true">
+         <p>La entrada de mi compañero Jeris sobre el inglés como experiencia situada me permitió ampliar mi comprensión sobre el lugar de enunciación del sujeto investigador. Su reflexión me llevó a pensar que, así como la enseñanza del inglés no puede reducirse a una lógica instrumental, la inclusión educativa tampoco puede comprenderse únicamente desde categorías institucionales o normativas.</p>
+         <p>Uno de los aprendizajes más significativos del módulo ha sido comprender que investigar en educación desde una perspectiva crítica exige revisar el lugar desde el cual se mira, escucha e interpreta la realidad. Antes de este proceso, podía asumir la investigación como una práctica orientada principalmente a observar un fenómeno, recoger información y analizarla con cierta distancia. Sin embargo, las epistemologías críticas me llevaron a tensionar esa idea y a reconocer que el investigador no es un sujeto neutral, separado de aquello que estudia, sino alguien situado histórica, social, cultural y emocionalmente.</p>
+         <p>Este reconocimiento transformó mi comprensión del proceso investigativo. Comprendí que no investigo la inclusión educativa desde un lugar vacío, sino desde mis experiencias, creencias, preguntas, preocupaciones y relaciones con la escuela. Mi manera de observar las relaciones entre estudiantes está atravesada por mi historia profesional, por mis comprensiones previas sobre la convivencia, por mis expectativas frente a la escuela y también por los discursos institucionales que han configurado mi forma de nombrar la inclusión. Por eso, el lugar de enunciación se convierte en una categoría fundamental: me obliga a preguntarme desde dónde hablo, a quiénes observo, cómo interpreto y qué efectos pueden producir mis interpretaciones sobre los sujetos con quienes investigo.</p>
+         <p>En este sentido, la escuela adquiere una dimensión ética. No se trata únicamente de oír lo que los estudiantes dicen, sino de reconocerlos como interlocutores válidos en la construcción de conocimiento. Esta idea dialoga con la noción de legitimación del otro, porque investigar relaciones incluyentes implica no reducir a los estudiantes a datos, comportamientos o evidencias, sino reconocer sus experiencias, emociones, formas de relacionarse y maneras de comprender el mundo escolar. Escuchar críticamente supone renunciar a la comodidad de hablar por los otros y abrir espacio para que sus voces cuestionen mis propias categorías.</p>
+         <p>Este ha sido un desaprendizaje profundo: comprender que investigar no consiste en confirmar lo que ya creo saber sobre la inclusión, sino en permitirme ser interpelada por las voces, tensiones y experiencias de los estudiantes. También implica reconocer mis propios sesgos. Puedo acercarme al aula con la intención de comprender las relaciones incluyentes, pero si no reviso las categorías previas, corro el riesgo de interpretar a los estudiantes desde miradas adultocéntricas, institucionales o normativas.</p>
+         <p>Para mi investigación doctoral, esta reflexión es fundamental. Si deseo analizar cómo las prácticas pedagógicas favorecen relaciones incluyentes entre estudiantes, necesito construir una relación más horizontal, dialógica y reflexiva. Esto implica diseñar espacios donde los estudiantes puedan expresar cómo viven la exclusión, y qué sentidos atribuyen a sus relaciones con los demás.</p>
+        </div>
+        <div class="mt-6 p-4 bg-[#f0f7f1] rounded-xl border-l-4 border-[#5b7a5e]">
+         <p class="text-sm font-semibold text-[#5b7a5e] mb-2 flex items-center gap-2"><i data-lucide="help-circle" style="width:16px;height:16px"></i> Preguntas emergentes</p>
+         <div class="text-[#374151] text-sm space-y-1" contenteditable="true">
+          <p>¿Desde qué lugar estoy nombrando la inclusión?</p>
+          <p>¿Estoy realmente escuchando a los estudiantes o interpretándolos desde mis propias categorías?</p>
+          <p>¿Cómo evitar hablar por aquellos a quiénes deseo reconocer? ¿Qué formas de investigación pueden hacer posible una escuela más ética, horizontal y transformadora?</p>
+         </div>
+        </div>
+       </article>
+      </div>
+      <div class="flex justify-between items-center mt-6 gap-4">
+       <button onclick="goToPage(4)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e5e7eb] hover:bg-[#d1d5db] text-[#374151] font-medium transition-colors"><i data-lucide="arrow-left" style="width:18px;height:18px"></i><span class="hidden sm:inline">Atrás</span></button>
+       <div class="text-sm text-[#6b7280]">
+        5 / 8
+       </div><button onclick="goToPage(6)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5b7a5e] hover:bg-[#4a6b4d] text-white font-medium transition-colors"><span class="hidden sm:inline">Siguiente</span><i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+      </div>
+     </div><!-- Page 6: Entry 6 -->
+     <div class="page h-full flex flex-col px-6 md:px-12 py-8">
+      <div class="flex-1 overflow-y-auto">
+       <article class="bg-white rounded-2xl shadow-md p-8 md:p-10">
+        <div class="flex items-start gap-4 mb-6">
+         <div class="photo-circle bg-[#d6dce4]" onclick="uploadPhoto(this)">
+          <div class="w-full h-full flex items-center justify-center text-[#4a5e7a] text-2xl font-bold">
+           J
+          </div>
+          <div class="photo-overlay"><i data-lucide="camera" style="width:20px;height:20px;color:white"></i>
+          </div><input type="file" accept="image/*" class="hidden" onchange="handlePhoto(event, this.parentElement)">
+         </div>
+         <div>
+          <span class="text-xs uppercase tracking-widest text-[#5b7a5e] font-semibold">Entrada 6 — 27 de mayo de 2026</span>
+          <h2 class="heading-font text-2xl md:text-3xl font-bold text-[#2c3e2d]">Problematizar la experiencia: del interés pedagógico al campo crítico de investigación</h2>
+          <p class="text-sm text-[#6b7280]">Autor: <span contenteditable="true">Jeris Zabala</span></p>
+         </div>
+        </div>
+        <div class="prose prose-lg text-[#374151] leading-relaxed space-y-4" contenteditable="true">
+         <p>La unidad 4 del módulo me permitió desplazar la mirada desde la experiencia pedagógica inmediata hacia la construcción crítica del campo problemático. Comprendí que una investigación doctoral no se configura únicamente a partir de aquello que inquieta o preocupa al maestro en su práctica cotidiana, sino desde la capacidad de convertir esa inquietud en una problematización situada, teóricamente fundamentada y ético-políticamente orientada. Este giro fue importante porque me ayudó a reconocer que el punto de partida de la investigación no es simplemente tener un problema, sino construirlo críticamente, identificando las relaciones, las tensiones, silencios, intereses y supuestos que lo hacen posible dentro de un contexto educativo específico.</p>
+         <p>El principal desaprendizaje de esta unidad consiste en comprender que problematizar no es simplemente identificar una dificultad, sino construir un campo de relaciones. Esto implica reconocer sujetos, contextos, tensiones, discursos, saberes legitimados y saberes marginados. Desde esta perspectiva, el problema de mi investigación no puede reducirse a la baja motivación de los estudiantes frente al inglés ni a la necesidad de aplicar estrategias más atractivas. La cuestión es más profunda: se trata de comprender cómo se ha configurado la relación de los estudiantes con el inglés dentro de una escuela atravesada por lógicas curriculares, expectativas institucionales, discursos sobre el bilingüismo, condiciones territoriales y experiencias subjetivas.</p>
+         <p>Este cambio transforma mi manera de pensar la tesis doctoral. Antes podía formular mi investigación alrededor de la pregunta por el impacto de la gamificación en el aprendizaje del inglés. Ahora reconozco que esa formulación puede quedarse atrapada en una lógica instrumental si solo busca medir resultados. Desde una epistemología crítica, necesito preguntarme cómo el storytelling situado y la gamificación pueden abrir posibilidades de sentido, reconocimiento y agencia en los estudiantes. Esto implica desplazar la investigación desde la simple innovación didáctica hacia la construcción de un campo problemático donde el inglés sea comprendido como experiencia cultural, pedagógica, emocional y política.</p>
+         <p>La problematización crítica también me interpela como sujeto investigador. No puedo ubicarme por fuera de aquello que investigo, porque hago parte del contexto escolar, de las prácticas pedagógicas y de las decisiones curriculares que deseo analizar. Mi lugar como maestro investigador exige reflexividad: revisar mis propios supuestos, mis formas de nombrar a los estudiantes, mis expectativas sobre el aprendizaje y los riesgos de convertir la gamificación en una estrategia de control disfrazada de juego.</p>
+         <p>Esta entrada cierra para mí un desplazamiento importante: de pensar la investigación como búsqueda de soluciones a comprenderla como construcción crítica de sentido. Investigar no será solamente demostrar que una estrategia funciona, sino comprender qué transforma, a quién reconoce, qué voces habilita y qué relaciones de poder cuestiona.</p>
+        </div>
+        <div class="mt-6 p-4 bg-[#f0f7f1] rounded-xl border-l-4 border-[#5b7a5e]">
+         <p class="text-sm font-semibold text-[#5b7a5e] mb-2 flex items-center gap-2"><i data-lucide="help-circle" style="width:16px;height:16px"></i> Preguntas emergentes</p>
+         <div class="text-[#374151] text-sm space-y-1" contenteditable="true">
+          <p>¿Qué categorías debo desaprender para no reducir mi investigación a innovación metodológica?</p>
+          <p>¿Cómo construir un problema doctoral que reconozca la voz de los estudiantes?</p>
+          <p>¿Qué implicaciones ético-políticas tiene investigar mi propia práctica docente en un contexto escolar situado?</p>
+         </div>
+        </div>
+       </article>
+      </div>
+      <div class="flex justify-between items-center mt-6 gap-4">
+       <button onclick="goToPage(5)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e5e7eb] hover:bg-[#d1d5db] text-[#374151] font-medium transition-colors"><i data-lucide="arrow-left" style="width:18px;height:18px"></i><span class="hidden sm:inline">Atrás</span></button>
+       <div class="text-sm text-[#6b7280]">
+        6 / 8
+       </div><button onclick="goToPage(7)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5b7a5e] hover:bg-[#4a6b4d] text-white font-medium transition-colors"><span class="hidden sm:inline">Siguiente</span><i data-lucide="arrow-right" style="width:18px;height:18px"></i></button>
+      </div>
+     </div><!-- Page 7: Final Reflection -->
+     <div class="page h-full flex flex-col px-6 md:px-12 py-8">
+      <div class="flex-1 overflow-y-auto">
+       <section class="bg-[#2c3e2d] rounded-2xl p-8 md:p-10 text-[#f7f4ef] h-full flex flex-col">
+        <div class="flex items-center gap-3 mb-6"><i data-lucide="feather" style="width:28px;height:28px;color:#a8c5a0"></i>
+         <h2 id="reflection-title" class="heading-font text-3xl font-bold" contenteditable="true">Reflexión Final</h2>
+        </div>
+        <div class="text-[#d4e4d6] leading-relaxed flex-1 text-lg overflow-y-auto space-y-4" contenteditable="true">
+         <p>El desarrollo del diario reflexivo digital nos permitió reconocer que el proceso de formación en el módulo Pensamiento y Epistemologías Críticas en Educación no consistió únicamente en incorporar nuevos conceptos teóricos, sino en vivir un proceso de (des)aprendizaje epistemológico. A lo largo de las entradas, fuimos comprendiendo que muchas de nuestras preguntas iniciales como docentes e investigadores estaban marcadas por preocupaciones pedagógicas legítimas, pero todavía cercanas a una mirada técnica de la educación: cómo mejorar la participación, cómo favorecer la inclusión, cómo motivar a los estudiantes o cómo fortalecer determinados aprendizajes. Sin embargo, el módulo nos permitió desplazar esas inquietudes hacia preguntas más profundas sobre el poder, el saber, la subjetividad, el reconocimiento, la escucha y la construcción crítica del campo investigativo.</p>
+         <p>Uno de los principales aprendizajes fue comprender que los problemas educativos no pueden analizarse únicamente como dificultades metodológicas o institucionales. La inclusión educativa, por ejemplo, no puede reducirse a la presencia física de los estudiantes en el aula ni al cumplimiento formal de políticas escolares. A partir de las epistemologías críticas, comprendimos que incluir implica reconocer al otro como sujeto de palabra, experiencia y saber. Esta comprensión permitió tensionar la idea de que la escuela es automáticamente un espacio incluyente por recibir a todos los estudiantes. Por el contrario, vimos que también puede producir exclusiones sutiles cuando clasifica, normaliza, silencia o interpreta la diferencia desde el déficit.</p>
+         <p>De igual manera, el análisis de la razón instrumental nos permitió cuestionar la forma como la educación puede quedar atrapada en lógicas de eficiencia, medición y resultado. En el caso de la enseñanza del inglés, este desaprendizaje fue especialmente significativo, pues permitió reconocer que aprender una lengua extranjera no debería limitarse al cumplimiento de estándares, niveles o indicadores, sino abrir posibilidades de sentido, identidad, expresión y agencia. Esto transformó la comprensión de la gamificación y el storytelling dentro de la investigación doctoral, al dejar de pensarlas solo como estrategias motivacionales para asumirlas como mediaciones pedagógicas situadas que pueden reconocer la voz y el territorio de los estudiantes.</p>
+         <p>Otro aprendizaje fundamental estuvo relacionado con la colonialidad del saber. Comprendimos que muchas prácticas educativas reproducen jerarquías culturales y epistémicas cuando privilegian ciertos conocimientos, lenguajes y formas de aprender, mientras invisibilizan otros saberes y experiencias. Esta reflexión nos permitió reconocer que una educación crítica no solo debe preguntarse por cómo enseñar mejor, sino también por qué saberes se legitiman, qué voces se silencian y qué sujetos son reconocidos como productores de conocimiento.</p>
+         <p>Asimismo, el módulo transformó nuestra comprensión del sujeto investigador. La idea de neutralidad comenzó a ser cuestionada al reconocer que investigamos desde lugares concretos, atravesados por nuestra historia, nuestra práctica docente, nuestros contextos institucionales y nuestras propias formas de mirar. Comprendimos que investigar críticamente exige reflexividad, escucha ética y conciencia del lugar de enunciación. No se trata de observar a los estudiantes como objetos de estudio, sino de construir conocimiento con ellos, reconociéndolos como interlocutores válidos.</p>
+         <p>Finalmente, el diario nos ayudó a comprender que una investigación doctoral no nace simplemente de una inquietud práctica, sino de un proceso de problematización crítica. Este proceso implica develar relaciones de poder, cuestionar categorías naturalizadas, visibilizar saberes silenciados y construir formas más horizontales de producción de conocimiento. En este sentido, el módulo nos permitió pasar de una mirada centrada en la solución del problema educativo hacia una comprensión más amplia de la investigación como práctica ética, política y transformadora.</p>
+         <p class="font-semibold text-[#a8c5a0] mt-6">Como preguntas abiertas quedan las siguientes:</p>
+         <p>¿Cómo construir investigaciones educativas que no reproduzcan relaciones jerárquicas entre investigador y participantes? ¿Cómo hacer de la escuela un lugar donde la diferencia no sea administrada, sino reconocida? ¿Cómo transformar nuestras prácticas pedagógicas para que no solo enseñen contenidos, sino que también habiliten voces, experiencias y formas otras de construir conocimiento?</p>
+         <p class="italic text-[#a8c5a0]">Estas preguntas no cierran el proceso; por el contrario, abren un horizonte de reflexión que seguirá acompañando nuestras trayectorias doctorales.</p>
+        </div>
+       </section>
+      </div>
+      <div class="flex justify-between items-center mt-6 gap-4">
+       <button onclick="goToPage(6)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#e5e7eb] hover:bg-[#d1d5db] text-[#374151] font-medium transition-colors"><i data-lucide="arrow-left" style="width:18px;height:18px"></i><span class="hidden sm:inline">Atrás</span></button>
+       <div class="text-sm text-[#6b7280]">
+        7 / 8
+       </div><button onclick="goToPage(0)" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#5b7a5e] hover:bg-[#4a6b4d] text-white font-medium transition-colors"><i data-lucide="home" style="width:18px;height:18px"></i><span class="hidden sm:inline">Inicio</span></button>
+      </div>
+     </div>
+    </main>
+   </div>
+   <script>
+let currentPage = 0;
+const photoStorage = {}; // Store photos by circle ID
+
+// Breadcrumb titles for each page
+const pageTitles = [
+  'Inicio',
+  'Entrada 1 — Inclusión educativa',
+  'Entrada 2 — Inglés situado',
+  'Entrada 3 — Freire y Foucault',
+  'Entrada 4 — Colonialidad del saber',
+  'Entrada 5 — Lugar de enunciación',
+  'Entrada 6 — Problematizar',
+  'Reflexión Final'
+];
+
+// Initialize: show only the first page on load
+// This block must remain outside toggleMenu().
+document.addEventListener('DOMContentLoaded', function () {
+  goToPage(0);
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+});
+
+function toggleMenu() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('menu-backdrop');
+  const menuIcon = document.getElementById('menu-icon');
+  const mobileOpenButton = document.getElementById('mobile-menu-open');
+
+  if (!sidebar) return;
+
+  sidebar.classList.toggle('menu-open');
+  const isOpen = sidebar.classList.contains('menu-open');
+
+  if (backdrop) {
+    backdrop.classList.toggle('menu-open', isOpen);
+  }
+
+  if (mobileOpenButton) {
+    mobileOpenButton.classList.toggle('hidden', isOpen);
+  }
+
+  if (menuIcon) {
+    menuIcon.setAttribute('data-lucide', isOpen ? 'x' : 'menu');
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+}
+
+// Close mobile menu when a link is clicked
+function handleNavClick() {
+  const sidebar = document.getElementById('sidebar');
+  const backdrop = document.getElementById('menu-backdrop');
+  const mobileOpenButton = document.getElementById('mobile-menu-open');
+
+  if (sidebar && sidebar.classList.contains('menu-open')) {
+    sidebar.classList.remove('menu-open');
+  }
+
+  if (backdrop && backdrop.classList.contains('menu-open')) {
+    backdrop.classList.remove('menu-open');
+  }
+
+  if (mobileOpenButton) {
+    mobileOpenButton.classList.remove('hidden');
+  }
+
+  const menuIcon = document.getElementById('menu-icon');
+  if (menuIcon) {
+    menuIcon.setAttribute('data-lucide', 'menu');
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+}
+
+function goToPage(pageIndex) {
+  handleNavClick();
+
+  const pages = document.querySelectorAll('.page');
+  const sidebarNavItems = document.querySelectorAll('#sidebar button[data-page]');
+
+  if (pages.length === 0) return;
+  if (pageIndex < 0 || pageIndex >= pages.length) return;
+
+  pages.forEach((page) => {
+    page.classList.remove('active');
+  });
+
+  sidebarNavItems.forEach((item) => {
+    item.classList.remove('active');
+    const dot = item.querySelector('.nav-dot');
+    if (dot) dot.classList.remove('active');
+  });
+
+  pages[pageIndex].classList.add('active');
+
+  const selectedItem = document.querySelector(`#sidebar button[data-page="${pageIndex}"]`);
+  if (selectedItem) {
+    selectedItem.classList.add('active');
+    const dot = selectedItem.querySelector('.nav-dot');
+    if (dot) dot.classList.add('active');
+  }
+
+  currentPage = pageIndex;
+  updateBreadcrumb(pageIndex);
+  restorePhotos();
+
+  const activeScrollArea = pages[pageIndex].querySelector('.overflow-y-auto');
+  if (activeScrollArea) activeScrollArea.scrollTop = 0;
+}
+
+function updateBreadcrumb(pageIndex) {
+  const breadcrumbContainer = document.getElementById('breadcrumb-container');
+  const breadcrumbCurrent = document.getElementById('breadcrumb-current');
+
+  if (!breadcrumbContainer || !breadcrumbCurrent) return;
+
+  if (pageIndex === 0) {
+    breadcrumbContainer.classList.add('hidden');
+  } else {
+    breadcrumbContainer.classList.remove('hidden');
+    breadcrumbCurrent.textContent = pageTitles[pageIndex] || '';
+  }
+}
+
+function uploadPhoto(circle) {
+  const input = circle.querySelector('input[type="file"]');
+  if (input) input.click();
+}
+
+function getCircleId(circle) {
+  const parent = circle.closest('article, section, .text-center') || circle.parentElement;
+  const authorName = parent?.querySelector('h3, [contenteditable="true"]')?.textContent?.trim() || '';
+  const letter = circle.textContent?.trim()?.charAt(0) || 'photo';
+  return `${letter}-${authorName}`.replace(/\s+/g, '-').toLowerCase();
+}
+
+function handlePhoto(event, circle) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const photoData = e.target.result;
+    const circleId = getCircleId(circle);
+    photoStorage[circleId] = photoData;
+    applyPhotoToCircle(circle, photoData);
+  };
+  reader.readAsDataURL(file);
+}
+
+function applyPhotoToCircle(circle, photoData) {
+  const existing = circle.querySelector('img');
+  if (existing) existing.remove();
+
+  const initialDiv = Array.from(circle.children).find((child) => !child.classList.contains('photo-overlay') && child.tagName !== 'INPUT');
+  if (initialDiv) initialDiv.style.display = 'none';
+
+  const img = document.createElement('img');
+  img.src = photoData;
+  img.alt = 'Foto del autor';
+  circle.insertBefore(img, circle.firstChild);
+}
+
+function restorePhotos() {
+  setTimeout(() => {
+    const allCircles = document.querySelectorAll('.photo-circle');
+    allCircles.forEach((circle) => {
+      const circleId = getCircleId(circle);
+      if (photoStorage[circleId]) {
+        applyPhotoToCircle(circle, photoStorage[circleId]);
+      }
+    });
+  }, 0);
+}
+
+const defaultConfig = {
+  journal_title: 'Diario Reflexivo Colaborativo',
+  reflection_title: 'Reflexión Final',
+  module_name: 'Pensamiento y Epistemologías Críticas en Educación',
+  cover_description:
+    'Este diario reflexivo colaborativo representa el ejercicio de pensamiento crítico compartido entre los autores a lo largo del módulo de Pensamiento y Epistemologías Críticas en Educación en el programa de Doctorado en Pedagogía y Saberes Educativos de la Universidad de Manizales. Cada entrada documenta desaprendizajes, tensiones conceptuales y nuevas preguntas que emergen del diálogo entre la teoría crítica y las prácticas pedagógicas situadas.'
+};
+
+if (window.elementSdk) {
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => {
+      const title = document.getElementById('main-title');
+      const reflTitle = document.getElementById('reflection-title');
+      const sidebarModule = document.getElementById('sidebar-module-name');
+      const coverSubtitle = document.querySelector('p.text-xl.text-[#5b7a5e].mb-6');
+      const coverDescription = document.querySelector('.bg-white.rounded-2xl.shadow-md.p-8.mb-8 p');
+
+      if (title) title.textContent = config.journal_title || defaultConfig.journal_title;
+      if (reflTitle) reflTitle.textContent = config.reflection_title || defaultConfig.reflection_title;
+      if (sidebarModule) sidebarModule.textContent = config.module_name || defaultConfig.module_name;
+      if (coverSubtitle) coverSubtitle.textContent = config.module_name || defaultConfig.module_name;
+      if (coverDescription) coverDescription.textContent = config.cover_description || defaultConfig.cover_description;
+    },
+    mapToCapabilities: () => ({
+      recolorables: [],
+      borderables: [],
+      fontEditable: undefined,
+      fontSizeable: undefined
+    }),
+    mapToEditPanelValues: (config) =>
+      new Map([
+        ['journal_title', config.journal_title || defaultConfig.journal_title],
+        ['reflection_title', config.reflection_title || defaultConfig.reflection_title],
+        ['module_name', config.module_name || defaultConfig.module_name],
+        ['cover_description', config.cover_description || defaultConfig.cover_description]
+      ])
+  });
+}
+
+if (typeof lucide !== 'undefined') {
+  lucide.createIcons();
+}
+</script>
+  </div></body>
+</html>
