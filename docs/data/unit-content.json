@@ -1,0 +1,92 @@
+{
+  "titulo": "Voces que Restauran",
+  "subtitulo": "Inteligencia artificial para narrar, reflexionar y construir convivencia escolar",
+  "descripcion": "Unidad didáctica interactiva para explorar cómo las narrativas, la escucha activa y el uso ético de la IA pueden fortalecer la convivencia escolar.",
+  "duracion": "4 momentos · 8 a 10 horas de trabajo",
+  "publico": "Educación básica secundaria y media",
+  "proposito": "Promover experiencias restaurativas mediante relatos, reflexión crítica y co-creación de acuerdos de convivencia con apoyo responsable de herramientas de IA.",
+  "competencias": [
+    "Comunicación oral y escrita con enfoque empático.",
+    "Ciudadanía, convivencia y resolución pacífica de conflictos.",
+    "Pensamiento crítico frente al uso de inteligencia artificial.",
+    "Creatividad narrativa y colaboración escolar."
+  ],
+  "momentos": [
+    {
+      "id": "escuchar",
+      "numero": "01",
+      "titulo": "Escuchar para comprender",
+      "duracion": "2 horas",
+      "pregunta": "¿Qué voces suelen quedar fuera cuando hablamos de convivencia?",
+      "actividades": [
+        "Círculo de palabra sobre situaciones cotidianas de conflicto escolar.",
+        "Mapa de emociones: reconocer sentimientos propios y ajenos.",
+        "Acuerdo de cuidado para narrar sin exponer datos sensibles."
+      ],
+      "producto": "Bitácora inicial de voces, emociones y necesidades."
+    },
+    {
+      "id": "narrar",
+      "numero": "02",
+      "titulo": "Narrar con responsabilidad",
+      "duracion": "2 a 3 horas",
+      "pregunta": "¿Cómo contamos una historia sin aumentar el daño?",
+      "actividades": [
+        "Transformación de casos ficticios en relatos restaurativos.",
+        "Exploración guiada de prompts para mejorar tono, claridad y empatía.",
+        "Revisión ética: sesgos, privacidad y consentimiento."
+      ],
+      "producto": "Relato restaurativo revisado colaborativamente."
+    },
+    {
+      "id": "reflexionar",
+      "numero": "03",
+      "titulo": "Reflexionar con IA crítica",
+      "duracion": "2 horas",
+      "pregunta": "¿Qué puede aportar la IA y qué decisiones siguen siendo humanas?",
+      "actividades": [
+        "Comparación entre respuestas generadas por IA y criterios del grupo.",
+        "Semáforo ético para validar recomendaciones tecnológicas.",
+        "Diálogo sobre agencia, cuidado y corresponsabilidad."
+      ],
+      "producto": "Lista argumentada de usos permitidos, cuidados y límites."
+    },
+    {
+      "id": "construir",
+      "numero": "04",
+      "titulo": "Construir acuerdos de convivencia",
+      "duracion": "2 a 3 horas",
+      "pregunta": "¿Qué compromisos restauran la confianza en nuestra comunidad?",
+      "actividades": [
+        "Diseño de acuerdos y microacciones de aula.",
+        "Galería de voces: socialización de relatos y aprendizajes.",
+        "Prototipado participativo de una futura app escolar."
+      ],
+      "producto": "Manifiesto de convivencia y tablero de compromisos."
+    }
+  ],
+  "rubrica": [
+    {
+      "criterio": "Escucha y empatía",
+      "niveles": ["Identifica emociones básicas.", "Reconoce perspectivas diversas.", "Integra necesidades de varias voces.", "Facilita escucha respetuosa y reparadora."]
+    },
+    {
+      "criterio": "Narrativa restaurativa",
+      "niveles": ["Describe hechos sin claridad suficiente.", "Diferencia hechos, emociones y juicios.", "Construye relatos cuidadosos y propositivos.", "Inspira reparación, responsabilidad y esperanza."]
+    },
+    {
+      "criterio": "Uso crítico de IA",
+      "niveles": ["Usa IA sin verificar resultados.", "Reconoce riesgos básicos de privacidad.", "Contrasta y mejora respuestas de IA.", "Define límites éticos y decisiones humanas."]
+    },
+    {
+      "criterio": "Colaboración y acuerdos",
+      "niveles": ["Participa de forma ocasional.", "Aporta ideas al equipo.", "Co-crea acuerdos viables.", "Moviliza compromisos sostenibles en el grupo."]
+    }
+  ],
+  "recursos": [
+    {"titulo": "Guía de prompts cuidadosos", "tipo": "Plantilla", "descripcion": "Estructuras de preguntas para mejorar relatos sin usar datos personales."},
+    {"titulo": "Semáforo ético de IA", "tipo": "Herramienta", "descripcion": "Lista de verificación para decidir cuándo usar, revisar o descartar una respuesta generada."},
+    {"titulo": "Bitácora restaurativa", "tipo": "Diario", "descripcion": "Formato para registrar emociones, aprendizajes, acuerdos y preguntas pendientes."},
+    {"titulo": "Círculo de palabra", "tipo": "Dinámica", "descripcion": "Pautas para facilitar conversaciones seguras, breves y respetuosas."}
+  ]
+}

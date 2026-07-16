@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Voces que Restauran · Unidad didáctica</title>
+    <meta name="description" content="Unidad didáctica interactiva sobre IA, narrativas restaurativas y convivencia escolar." />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="site-header" id="inicio">
+      <nav class="navbar" aria-label="Navegación principal">
+        <a class="brand" href="#inicio" aria-label="Inicio Voces que Restauran"><span>Voces</span> que Restauran</a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navLinks">☰</button>
+        <div class="nav-links" id="navLinks">
+          <a href="#ruta">Ruta</a>
+          <a href="#modos">Modos</a>
+          <a href="#rubrica">Rúbrica</a>
+          <a href="#cronograma">Cronograma</a>
+          <a href="#recursos">Recursos</a>
+          <a href="#app-futura">App futura</a>
+        </div>
+      </nav>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Unidad didáctica interactiva</p>
+          <h1 id="unitTitle">Voces que Restauran</h1>
+          <p class="lead" id="unitSubtitle">Inteligencia artificial para narrar, reflexionar y construir convivencia escolar.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#ruta">Explorar ruta</a>
+            <a class="button ghost" href="#app-futura">Ver alcance</a>
+          </div>
+        </div>
+        <aside class="hero-card" aria-label="Resumen de la unidad">
+          <strong>Propósito</strong>
+          <p id="unitPurpose">Promover experiencias restaurativas mediante relatos, reflexión crítica y acuerdos de convivencia.</p>
+          <dl>
+            <div><dt>Duración</dt><dd id="unitDuration">4 momentos</dd></div>
+            <div><dt>Público</dt><dd id="unitAudience">Secundaria y media</dd></div>
+          </dl>
+        </aside>
+      </section>
+    </header>
+
+    <main>
+      <section class="section" id="modos">
+        <div class="section-heading">
+          <p class="eyebrow">Experiencia adaptable</p>
+          <h2>Modo docente y modo estudiante</h2>
+          <p>Alterna la mirada para consultar orientaciones pedagógicas o consignas de aula.</p>
+        </div>
+        <div class="mode-switch" role="group" aria-label="Seleccionar modo de visualización">
+          <button class="mode-button active" data-mode="docente" type="button">Modo docente</button>
+          <button class="mode-button" data-mode="estudiante" type="button">Modo estudiante</button>
+        </div>
+        <div class="mode-panel" id="modePanel" aria-live="polite"></div>
+      </section>
+
+      <section class="section warm" id="ruta">
+        <div class="section-heading">
+          <p class="eyebrow">Ruta didáctica</p>
+          <h2>Cuatro momentos para restaurar la palabra</h2>
+          <p>Despliega cada momento para revisar preguntas guía, actividades y producto esperado.</p>
+        </div>
+        <div class="accordion" id="momentsAccordion"></div>
+      </section>
+
+      <section class="section" id="rubrica">
+        <div class="section-heading">
+          <p class="eyebrow">Evaluación formativa</p>
+          <h2>Rúbrica interactiva</h2>
+          <p>Selecciona un nivel por criterio para generar una lectura orientadora del proceso.</p>
+        </div>
+        <div class="rubric" id="rubricGrid"></div>
+        <output class="rubric-result" id="rubricResult">Selecciona niveles para ver una retroalimentación.</output>
+      </section>
+
+      <section class="section warm" id="cronograma">
+        <div class="section-heading">
+          <p class="eyebrow">Planeación visual</p>
+          <h2>Cronograma sugerido</h2>
+        </div>
+        <div class="timeline" id="timeline"></div>
+      </section>
+
+      <section class="section" id="recursos">
+        <div class="section-heading">
+          <p class="eyebrow">Material de apoyo</p>
+          <h2>Recursos complementarios</h2>
+        </div>
+        <div class="resource-grid" id="resourcesGrid"></div>
+      </section>
+
+      <section class="section app-future" id="app-futura">
+        <div class="section-heading">
+          <p class="eyebrow">Siguiente fase</p>
+          <h2>App futura: diseñada con estudiantes</h2>
+        </div>
+        <p>Esta versión no recolecta datos ni implementa una app funcional. La aplicación se diseñará después como un prototipo participativo: el grupo definirá qué problemas atiende, qué datos son necesarios, cómo se protegen las voces y qué decisiones no deben delegarse a la IA.</p>
+        <ul>
+          <li>Primero: comprender necesidades reales de convivencia.</li>
+          <li>Después: co-diseñar flujos, permisos y criterios éticos.</li>
+          <li>Finalmente: validar un prototipo antes de cualquier recolección de información.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Hecho para GitHub Pages · Unidad “Voces que Restauran”.</p>
+      <a href="#inicio">Volver arriba ↑</a>
+    </footer>
+
+    <script src="assets/app.js" defer></script>
+  </body>
+</html>
